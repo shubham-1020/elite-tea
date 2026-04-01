@@ -44,9 +44,6 @@ export const metadata: Metadata = {
     'Darjeeling Tea delivery',
   ],
   authors: [{ name: 'Elite Tea' }],
-  verification: {
-    google: 'YOUR_VERIFICATION_CODE_HERE', // User can replace this after Search Console setup
-  },
   openGraph: {
     title: 'Elite Tea — Premium Assam Tea & Himalayan Delicacies',
     description:
