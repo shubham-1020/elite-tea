@@ -73,6 +73,25 @@ export const metadata: Metadata = {
   },
 };
 
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Elite Tea',
+  url: 'https://elite-tea.vercel.app',
+  logo: 'https://elite-tea.vercel.app/images/logo.png',
+  sameAs: [
+    'https://twitter.com/elitetea',
+    'https://instagram.com/elitetea',
+  ],
+  contactPoint: {
+    '@type': 'ContactPoint',
+    telephone: '+917811081552',
+    contactType: 'customer service',
+    areaServed: 'IN',
+    availableLanguage: ['en', 'Hindi'],
+  },
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -80,6 +99,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${playfair.variable} ${inter.variable}`}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className="min-h-screen flex flex-col">
         <AuthProvider>
           <CartProvider>
