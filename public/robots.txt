@@ -2,5 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /_next/
 Disallow: /api/
+Disallow: /cart
 
 Sitemap: https://elite-tea.vercel.app/sitemap.xml

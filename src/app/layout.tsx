@@ -44,6 +44,14 @@ export const metadata: Metadata = {
     'Darjeeling Tea delivery',
   ],
   authors: [{ name: 'Elite Tea' }],
+  alternates: {
+    canonical: 'https://elite-tea.vercel.app',
+  },
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
   openGraph: {
     title: 'Elite Tea — Premium Assam Tea & Himalayan Delicacies',
     description:
@@ -92,6 +100,31 @@ const jsonLd = {
   },
 };
 
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      name: 'Home',
+      item: 'https://elite-tea.vercel.app/',
+    },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: 'Products',
+      item: 'https://elite-tea.vercel.app/products',
+    },
+    {
+      '@type': 'ListItem',
+      position: 3,
+      name: 'About',
+      item: 'https://elite-tea.vercel.app/about',
+    },
+  ],
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -103,6 +136,10 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
         />
       </head>
       <body className="min-h-screen flex flex-col">
