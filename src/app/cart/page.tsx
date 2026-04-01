@@ -108,55 +108,56 @@ export default function CartPage() {
             {items.map((item) => (
               <div
                 key={`${item.product.id}-${item.selectedWeight}`}
-                className="bg-white rounded-2xl p-4 sm:p-6 shadow-md flex flex-col sm:flex-row gap-4 sm:gap-6 border border-brand-100/30"
+                className="relative bg-white rounded-2xl p-4 sm:p-6 shadow-md flex gap-4 sm:gap-6 border border-brand-100/30 items-start sm:items-stretch"
               >
-                <div className="relative w-full sm:w-28 h-28 rounded-xl overflow-hidden bg-cream shrink-0">
+                <button
+                  onClick={() => removeFromCart(item.product.id)}
+                  className="absolute top-3 right-3 sm:top-4 sm:right-4 text-brand-800/30 hover:text-red-500 transition-colors p-1.5 rounded-full hover:bg-red-50"
+                  aria-label="Remove item"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+
+                <div className="relative w-20 h-20 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-cream shrink-0 mt-1 sm:mt-0">
                   <Image
                     src={item.product.image}
                     alt={item.product.name}
                     fill
                     className="object-cover"
-                    sizes="112px"
+                    sizes="(max-width: 640px) 80px, 112px"
                   />
                 </div>
-                <div className="flex-1 flex flex-col justify-between">
+                
+                <div className="flex-1 flex flex-col justify-between pr-6 sm:pr-8 min-h-[5rem] sm:min-h-[7rem]">
                   <div>
                     <Link
                       href={`/products/${item.product.slug}`}
-                      className="font-display text-lg font-semibold text-brand-900 hover:text-gold-600 transition-colors"
+                      className="font-display text-base sm:text-lg font-semibold text-brand-900 hover:text-gold-600 transition-colors leading-tight block mb-1"
                     >
                       {item.product.name}
                     </Link>
-                    <p className="text-brand-800/40 text-sm mt-1">{item.selectedWeight}</p>
+                    <p className="text-brand-800/40 text-xs sm:text-sm">{item.selectedWeight}</p>
                   </div>
-                  <div className="flex items-center justify-between mt-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center bg-cream rounded-lg border border-brand-200/50 overflow-hidden">
-                        <button
-                          onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                          className="px-3 py-2 text-brand-800/60 hover:bg-brand-100 transition-colors text-sm"
-                        >
-                          −
-                        </button>
-                        <span className="px-4 py-2 text-brand-900 font-semibold text-sm">{item.quantity}</span>
-                        <button
-                          onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                          className="px-3 py-2 text-brand-800/60 hover:bg-brand-100 transition-colors text-sm"
-                        >
-                          +
-                        </button>
-                      </div>
+                  
+                  <div className="flex items-end justify-between mt-3 sm:mt-4">
+                    <span className="text-brand-900 font-bold text-base sm:text-lg">₹{item.selectedPrice * item.quantity}</span>
+                    <div className="flex items-center bg-cream rounded-lg border border-brand-200/50 overflow-hidden shrink-0">
                       <button
-                        onClick={() => removeFromCart(item.product.id)}
-                        className="text-red-400 hover:text-red-600 transition-colors p-2"
-                        aria-label="Remove item"
+                        onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                        className="px-2.5 sm:px-3 py-1.5 sm:py-2 text-brand-800/60 hover:bg-brand-100 transition-colors text-sm"
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
+                        −
+                      </button>
+                      <span className="px-3 sm:px-4 py-1.5 sm:py-2 text-brand-900 font-semibold text-sm">{item.quantity}</span>
+                      <button
+                        onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                        className="px-2.5 sm:px-3 py-1.5 sm:py-2 text-brand-800/60 hover:bg-brand-100 transition-colors text-sm"
+                      >
+                        +
                       </button>
                     </div>
-                    <span className="text-brand-900 font-bold text-lg">₹{item.selectedPrice * item.quantity}</span>
                   </div>
                 </div>
               </div>

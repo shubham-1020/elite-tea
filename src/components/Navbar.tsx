@@ -62,30 +62,30 @@ export default function Navbar() {
         animate={{
           y: 0,
           opacity: 1,
-          top: isMobileScreen ? 12 : (isScrolled ? 12 : 20),
-          left: isMobileScreen ? 12 : (isScrolled ? 12 : 20),
-          right: isMobileScreen ? 12 : (isScrolled ? 12 : 20),
-          maxWidth: isScrolled ? '1024px' : '1200px',
+          top: isMobileScreen ? 8 : (isScrolled ? 12 : 24),
+          left: isMobileScreen ? 12 : (isScrolled ? 12 : 24),
+          right: isMobileScreen ? 12 : (isScrolled ? 12 : 24),
+          maxWidth: isScrolled ? '900px' : '1200px',
           borderRadius: 9999,
-          backgroundColor: isScrolled ? 'rgba(6, 33, 15, 0.88)' : 'rgba(6, 33, 15, 0.4)',
-          borderColor: isScrolled ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+          backgroundColor: isScrolled ? 'rgba(6, 18, 10, 0.85)' : 'rgba(6, 18, 10, 0.25)',
+          borderColor: isScrolled ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.03)',
         }}
         transition={{
           y: { type: "spring", stiffness: 150, damping: 22, mass: 1 },
           opacity: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
           default: { type: "spring", stiffness: 260, damping: 30, mass: 1 }
         }}
-        className={`fixed z-[100] mx-auto border backdrop-blur-xl ${isScrolled ? 'shadow-[0_8px_32px_rgba(6,33,15,0.4)]' : ''}`}
+        className={`fixed z-[100] mx-auto border backdrop-blur-2xl ${isScrolled ? 'shadow-[0_8px_32px_rgba(0,0,0,0.4)]' : ''}`}
         id="main-nav"
       >
         <motion.div 
           layout
           className="mx-auto flex items-center justify-between w-full"
           animate={{
-            paddingTop: isScrolled ? '0.6rem' : '1.25rem',
-            paddingBottom: isScrolled ? '0.6rem' : '1.25rem',
-            paddingLeft: isScrolled ? '0.75rem' : '1.5rem',
-            paddingRight: isScrolled ? '0.75rem' : '1.5rem',
+            paddingTop: isScrolled ? '0.4rem' : '0.8rem',
+            paddingBottom: isScrolled ? '0.4rem' : '0.8rem',
+            paddingLeft: isScrolled ? '0.6rem' : '1.2rem',
+            paddingRight: isScrolled ? '0.6rem' : '1.2rem',
           }}
           transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
         >
@@ -95,8 +95,8 @@ export default function Navbar() {
               layout
               className="relative rounded-full overflow-hidden border-2 border-gold-400/50 group-hover:border-gold-400 transition-colors shadow-lg shadow-gold-400/10 shrink-0"
               animate={{
-                width: isScrolled ? 40 : 48,
-                height: isScrolled ? 40 : 48,
+                width: isScrolled ? 36 : 44,
+                height: isScrolled ? 36 : 44,
               }}
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             >
@@ -107,7 +107,7 @@ export default function Navbar() {
                 layout
                 className="font-display font-bold text-white tracking-wider leading-none"
                 animate={{
-                  fontSize: isScrolled ? '1.125rem' : '1.25rem',
+                  fontSize: isScrolled ? '1rem' : '1.125rem',
                 }}
                 transition={{ duration: 0.4 }}
               >

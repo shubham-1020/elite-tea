@@ -93,6 +93,8 @@ export default function HomePage() {
                 src="/images/hero-bg.png"
                 alt="Darjeeling tea gardens at sunrise"
                 fill
+                loading="lazy"
+                quality={80}
                 className="object-cover group-hover:scale-105 transition-transform duration-[1500ms]"
                 sizes="(max-width: 1024px) 100vw, 50vw"
               />
@@ -363,6 +365,8 @@ export default function HomePage() {
             src="/images/hero-bg.png"
             alt="Darjeeling tea garden background"
             fill
+            loading="lazy"
+            quality={60}
             className="object-cover"
             sizes="100vw"
           />

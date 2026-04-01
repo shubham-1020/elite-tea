@@ -138,6 +138,7 @@ export default function HeroCarousel() {
               }}
               sizes="100vw"
               priority={i === 0}
+              loading={i === 0 ? "eager" : "lazy"}
               quality={80}
             />
             {/* Gradient overlays */}
