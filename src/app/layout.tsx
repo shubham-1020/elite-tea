@@ -20,6 +20,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://elite-tea.vercel.app'),
   title: {
     default: 'Elite Tea — Premium Assam Tea | Elite Green Tea | Elite Rose Tea | Himalayan Churpi',
     template: '%s | Elite Tea',
@@ -39,13 +40,18 @@ export const metadata: Metadata = {
     'Best Assam Tea',
     'Northeast India Tea',
     'Loose Leaf Tea',
+    'Elite Tea Company',
+    'Darjeeling Tea delivery',
   ],
   authors: [{ name: 'Elite Tea' }],
+  verification: {
+    google: 'YOUR_VERIFICATION_CODE_HERE', // User can replace this after Search Console setup
+  },
   openGraph: {
     title: 'Elite Tea — Premium Assam Tea & Himalayan Delicacies',
     description:
       'Hand-picked premium teas from the gardens of Assam. Experience Elite Assam CTC, Elite Green Tea, Elite Rose Tea & Elite Himalayan Churpi.',
-    url: 'https://elitetea.in',
+    url: 'https://elite-tea.vercel.app',
     siteName: 'Elite Tea',
     locale: 'en_IN',
     type: 'website',
@@ -60,6 +66,13 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
 };
 
