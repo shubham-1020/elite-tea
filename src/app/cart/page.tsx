@@ -23,6 +23,7 @@ export default function CartPage() {
     codCharge,
     prepaidDiscount,
     total,
+    itemCount,
     paymentMethod,
     setPaymentMethod,
     SHIPPING_THRESHOLD,
@@ -225,26 +226,45 @@ export default function CartPage() {
               </div>
             ))}
 
-            {/* Bundle Upsell Nudge */}
-            {subtotal < SHIPPING_THRESHOLD && (
-              <div className="bg-gradient-to-r from-gold-50 to-orange-50 rounded-2xl p-6 border border-gold-200/50 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex gap-4 items-center">
-                  <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-2xl shadow-sm">
-                    📦
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-brand-900">Make it a Bundle!</h3>
-                    <p className="text-brand-800/60 text-sm">Add one more pack and save ₹{shippingFee + 50}+ on delivery fees!</p>
-                  </div>
+            {/* Bundle Upsell Nudge (Enhanced for Elite Volume Discount) */}
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-200/50 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+              <div className="flex gap-4 items-center">
+                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-3xl shadow-sm">
+                  ✨
                 </div>
+                <div>
+                  <h3 className="font-bold text-brand-900 text-lg">Elite Volume Reward</h3>
+                  <p className="text-brand-800/60 text-sm">
+                    {itemCount >= 2 ? (
+                      <span className="text-green-600 font-bold">🎉 You've unlocked an automatic 10% Extra OFF for buying 2+ items!</span>
+                    ) : (
+                      "Add 1 more item to automatically unlock 10% Extra OFF your entire order!"
+                    )}
+                  </p>
+                </div>
+              </div>
+              {itemCount < 2 && (
                 <Link 
                   href="/products"
-                  className="bg-brand-900 text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-brand-950 transition-all whitespace-nowrap"
+                  className="bg-brand-900 text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-brand-950 transition-all whitespace-nowrap shadow-md"
                 >
-                  Browse Teas
+                  Add More & Save
                 </Link>
-              </div>
-            )}
+              )}
+            </div>
+
+            {/* Satisfaction Guarantee Badge (NEW) */}
+            <div className="bg-blue-50/50 rounded-2xl p-6 border border-blue-100/50 flex items-center gap-4">
+               <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center text-3xl shadow-inner shrink-0">
+                 🛡️
+               </div>
+               <div>
+                  <h3 className="font-bold text-brand-900">Risk-Free Purchase</h3>
+                  <p className="text-brand-800/55 text-sm leading-relaxed">
+                    Not sure? We offer a **100% Satisfaction Guarantee**. If you don't love our tea, we'll refund your first sip. 
+                  </p>
+               </div>
+            </div>
           </div>
 
           {/* Order Summary */}

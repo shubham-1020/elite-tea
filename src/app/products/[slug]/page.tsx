@@ -10,6 +10,7 @@ import ProductCard from '@/components/ProductCard';
 import { db } from '@/lib/firebase';
 import { doc, onSnapshot, updateDoc, increment, setDoc, getDoc } from 'firebase/firestore';
 import { Metadata } from 'next';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -217,17 +218,26 @@ function ProductDetail({ product }: { product: (typeof products)[0] }) {
             </div>
 
             {/* Scarcity & Social Proof (LIVE DATA) */}
-            <div className="flex flex-col gap-2 mb-8">
-              <div className="flex items-center gap-2 text-red-600 font-semibold text-sm">
-                <span className="relative flex h-2 w-2">
+            <div className="flex flex-col gap-3 mb-8">
+              <div className="flex items-center gap-2 text-red-600 font-bold text-sm bg-red-50/50 px-4 py-2 rounded-xl border border-red-100/50 w-fit">
+                <span className="relative flex h-2.5 w-2.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
                 </span>
-                Highly in demand — limited batches available!
+                Flash Sale: Batch #804 is 92% Sold Out!
               </div>
               {liveViews !== null && (
-                <div className="flex items-center gap-2 text-brand-800/60 text-sm italic transition-opacity duration-500">
-                  🔥 <span className="font-bold text-brand-950">{liveViews} people</span> are viewing this right now
+                <div className="flex items-center gap-3 text-brand-800/70 text-sm font-medium bg-white/50 px-4 py-2 rounded-xl border border-brand-100/30 w-fit shadow-sm">
+                  <span className="flex items-center gap-1">
+                    <span className="flex -space-x-2">
+                       {[1,2,3].map(i => (
+                         <div key={i} className="w-6 h-6 rounded-full bg-gradient-to-r from-gold-400 to-gold-600 border-2 border-white flex items-center justify-center text-[10px] text-white font-bold">
+                           {String.fromCharCode(64 + i)}
+                         </div>
+                       ))}
+                    </span>
+                  </span>
+                  <span className="text-brand-900 font-bold">{liveViews} people</span> are viewing this now
                 </div>
               )}
             </div>
@@ -312,25 +322,35 @@ function ProductDetail({ product }: { product: (typeof products)[0] }) {
               <span className="text-brand-800/50 text-base">/ {selectedWeight.weight}</span>
             </div>
 
-            {/* Benefits & Trust Badges (Easy Return) */}
+            {/* Benefits & Trust Badges (PRO VERSION) */}
             <div className="grid grid-cols-2 gap-3 mb-8">
-              <div className="flex items-center gap-3 p-4 rounded-2xl bg-brand-50 border border-brand-100/50">
-                <div className="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center text-brand-700 shrink-0 text-xl">
-                  🍃
+              <div className="flex items-center gap-3 p-4 rounded-2xl bg-brand-50 border border-brand-100/50 hover:bg-brand-100/30 transition-colors">
+                <div className="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center text-brand-700 shrink-0 text-xl shadow-inner">
+                  🌿
                 </div>
                 <div>
-                  <h4 className="font-bold text-brand-900 text-sm">100% Organic</h4>
-                  <p className="text-xs text-brand-800/60 leading-tight">Fresh from Assam</p>
+                  <h4 className="font-bold text-brand-900 text-xs sm:text-sm">Direct from Garden</h4>
+                  <p className="text-[10px] sm:text-xs text-brand-800/60 leading-tight">No Middlemen</p>
                 </div>
               </div>
               
-              <div className="flex items-center gap-3 p-4 rounded-2xl bg-gold-50 border border-gold-100/50">
-                <div className="w-10 h-10 rounded-full bg-gold-100 flex items-center justify-center text-gold-700 shrink-0 text-xl">
-                  🚚
+              <div className="flex items-center gap-3 p-4 rounded-2xl bg-gold-50 border border-gold-100/50 hover:bg-gold-100/30 transition-colors">
+                <div className="w-10 h-10 rounded-full bg-gold-100 flex items-center justify-center text-gold-700 shrink-0 text-xl shadow-inner">
+                  🏅
                 </div>
                 <div>
-                  <h4 className="font-bold text-brand-900 text-sm">Fast Delivery</h4>
-                  <p className="text-xs text-brand-800/60 leading-tight">Free above ₹499</p>
+                  <h4 className="font-bold text-brand-900 text-xs sm:text-sm">FSSAI Certified</h4>
+                  <p className="text-[10px] sm:text-xs text-brand-800/60 leading-tight">100% Pure & Safe</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 p-4 rounded-2xl bg-blue-50 border border-blue-100/50 col-span-2 shadow-sm">
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0 text-xl shadow-inner">
+                  🛡️
+                </div>
+                <div>
+                  <h4 className="font-bold text-brand-900 text-sm">Risk-Free: 100% Satisfaction</h4>
+                  <p className="text-xs text-brand-800/60 leading-tight">Love the taste or we refund your first sip. No questions asked.</p>
                 </div>
               </div>
             </div>
@@ -402,7 +422,7 @@ function ProductDetail({ product }: { product: (typeof products)[0] }) {
               </div>
             </div>
 
-            {/* Add to Cart */}
+            {/* Add to Cart & Sticky Mobile CTA */}
             <div className="flex flex-col sm:flex-row gap-4">
               <button
                 onClick={handleAddToCart}
@@ -443,6 +463,28 @@ function ProductDetail({ product }: { product: (typeof products)[0] }) {
                 </svg>
                 Quick Order
               </a>
+            </div>
+
+            {/* STICKY BOTTOM BAR (MOBILE ONLY) */}
+            <div className="lg:hidden fixed bottom-1 left-0 right-0 z-[150] px-4 pointer-events-none">
+              <motion.div 
+                initial={{ y: 100 }}
+                animate={{ y: 0 }}
+                className="pointer-events-auto bg-brand-900/95 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] flex items-center justify-between gap-4"
+              >
+                <div className="flex flex-col">
+                  <span className="text-white font-bold text-lg">₹{selectedWeight.price * quantity}</span>
+                  <span className="text-white/40 text-[10px] tracking-widest uppercase">{selectedWeight.weight}</span>
+                </div>
+                <button
+                  onClick={handleAddToCart}
+                  className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all shadow-lg flex items-center justify-center gap-2 ${
+                    addedToCart ? 'bg-green-600 text-white' : 'bg-gold-500 text-brand-900'
+                  }`}
+                >
+                  {addedToCart ? 'Added!' : 'Add to Cart'}
+                </button>
+              </motion.div>
             </div>
 
             {/* Brewing Instructions */}

@@ -142,19 +142,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setAppliedCoupon(null);
   }, []);
 
-  const discount = appliedCoupon
+  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+
+  const couponDiscount = appliedCoupon
     ? Math.round(subtotal * (appliedCoupon.discount / 100))
     : 0;
 
-  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  // NEW: Elite Volume Discount (Buy 2+ Get 10% Off)
+  const volumeDiscount = itemCount >= 2 ? Math.round((subtotal - couponDiscount) * 0.1) : 0;
 
   const shippingFee = (subtotal > 0 && subtotal < SHIPPING_THRESHOLD) ? SHIPPING_FEE : 0;
   const codCharge = paymentMethod === 'cod' ? COD_FEE : 0;
   
   // Keep the 10% prepaid bonus as a growth lever (or adjust as needed)
-  const prepaidDiscount = paymentMethod === 'prepaid' ? Math.round((subtotal - discount) * 0.1) : 0;
+  const prepaidDiscount = paymentMethod === 'prepaid' ? Math.round((subtotal - couponDiscount - volumeDiscount) * 0.1) : 0;
 
-  const total = subtotal - discount - prepaidDiscount + shippingFee + codCharge;
+  const total = subtotal - couponDiscount - volumeDiscount - prepaidDiscount + shippingFee + codCharge;
 
   return (
     <CartContext.Provider
@@ -168,7 +171,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         removeCoupon,
         appliedCoupon,
         subtotal,
-        discount,
+        discount: couponDiscount + volumeDiscount,
         shippingFee,
         codCharge,
         prepaidDiscount,
