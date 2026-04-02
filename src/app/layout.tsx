@@ -133,6 +133,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${playfair.variable} ${inter.variable}`}>
       <head>
+        <link rel="manifest" href="/manifest.json" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -142,13 +143,19 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
         />
       </head>
-      <body className="min-h-screen flex flex-col">
+      <body className="min-h-screen flex flex-col font-body">
+        <a 
+          href="#main-content" 
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[200] focus:px-6 focus:py-3 focus:bg-gold-500 focus:text-brand-900 focus:font-bold focus:rounded-xl focus:shadow-2xl transition-all"
+        >
+          Skip to main content
+        </a>
         <AuthProvider>
           <CartProvider>
             <Navbar />
             <PhoneAuth />
             <div className="flex-1 w-full overflow-x-hidden relative">
-              <main>{children}</main>
+              <main id="main-content">{children}</main>
             </div>
             <Footer />
           </CartProvider>

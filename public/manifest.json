@@ -1,0 +1,22 @@
+{
+  "name": "Elite Tea | Premium Assam Tea & Himalayan Delicacies",
+  "short_name": "Elite Tea",
+  "description": "Discover the finest premium teas from the gardens of Assam. Hand-picked Elite Assam CTC, organic Green Tea, aromatic Rose Tea & authentic Himalayan Churpi.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#06120a",
+  "theme_color": "#06120a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
