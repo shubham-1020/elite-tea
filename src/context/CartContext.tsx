@@ -15,15 +15,26 @@ interface CartContextType {
   appliedCoupon: CouponCode | null;
   subtotal: number;
   discount: number;
+  shippingFee: number;
+  codCharge: number;
+  prepaidDiscount: number;
   total: number;
   itemCount: number;
+  paymentMethod: 'prepaid' | 'cod';
+  setPaymentMethod: (method: 'prepaid' | 'cod') => void;
+  SHIPPING_THRESHOLD: number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
+  const SHIPPING_THRESHOLD = 499;
+  const SHIPPING_FEE = 49;
+  const COD_FEE = 49;
+
   const [items, setItems] = useState<CartItem[]>([]);
   const [appliedCoupon, setAppliedCoupon] = useState<CouponCode | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<'prepaid' | 'cod'>('prepaid');
   const [isHydrated, setIsHydrated] = useState(false);
 
   // Load cart from localStorage on mount
@@ -135,9 +146,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     ? Math.round(subtotal * (appliedCoupon.discount / 100))
     : 0;
 
-  const total = subtotal - discount;
-
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+
+  const shippingFee = (subtotal > 0 && subtotal < SHIPPING_THRESHOLD) ? SHIPPING_FEE : 0;
+  const codCharge = paymentMethod === 'cod' ? COD_FEE : 0;
+  
+  // Keep the 10% prepaid bonus as a growth lever (or adjust as needed)
+  const prepaidDiscount = paymentMethod === 'prepaid' ? Math.round((subtotal - discount) * 0.1) : 0;
+
+  const total = subtotal - discount - prepaidDiscount + shippingFee + codCharge;
 
   return (
     <CartContext.Provider
@@ -152,8 +169,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         appliedCoupon,
         subtotal,
         discount,
+        shippingFee,
+        codCharge,
+        prepaidDiscount,
         total,
         itemCount,
+        paymentMethod,
+        setPaymentMethod,
+        SHIPPING_THRESHOLD,
       }}
     >
       {children}

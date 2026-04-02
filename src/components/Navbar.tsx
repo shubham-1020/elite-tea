@@ -197,6 +197,16 @@ export default function Navbar() {
                         )}
                       </div>
                       <Link
+                        href="/profile"
+                        className="flex items-center gap-3 px-4 py-2.5 text-brand-800/70 hover:bg-cream text-sm transition-colors"
+                        onClick={() => setShowProfileMenu(false)}
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        My Profile
+                      </Link>
+                      <Link
                         href="/cart"
                         className="flex items-center gap-3 px-4 py-2.5 text-brand-800/70 hover:bg-cream text-sm transition-colors"
                         onClick={() => setShowProfileMenu(false)}
@@ -322,6 +332,16 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
+
+            {profile && (
+              <Link
+                href="/profile"
+                onClick={() => setIsMobileOpen(false)}
+                className="text-white/75 hover:text-white font-display text-lg tracking-wide transition-colors p-3 rounded-xl hover:bg-white/5 active:bg-white/10 sm:hidden"
+              >
+                My Profile
+              </Link>
+            )}
 
             <Link
               href="/cart"

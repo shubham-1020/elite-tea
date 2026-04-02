@@ -13,7 +13,9 @@ export function generateWhatsAppMessage(
   customerPhone?: string,
   profile?: UserProfile | null,
   paymentMethod?: 'prepaid' | 'cod',
-  prepaidDiscount?: number
+  prepaidDiscount?: number,
+  shippingFee?: number,
+  codCharge?: number
 
 ): string {
   let message = `🍵 *New Order — Elite Tea*\n`;
@@ -34,6 +36,12 @@ export function generateWhatsAppMessage(
   }
   if (paymentMethod === 'prepaid' && prepaidDiscount && prepaidDiscount > 0) {
     message += `Prepaid Bonus (10% Off): -₹${prepaidDiscount}\n`;
+  }
+  if (shippingFee && shippingFee > 0) {
+    message += `Shipping Fee: ₹${shippingFee}\n`;
+  }
+  if (codCharge && codCharge > 0) {
+    message += `COD Handling Fee: ₹${codCharge}\n`;
   }
   
   message += `━━━━━━━━━━━━━━━━━━\n`;

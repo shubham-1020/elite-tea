@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, use } from 'react';
+import { useState, use, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { products, testimonials } from '@/data/products';
 import { useCart } from '@/context/CartContext';
 import ProductCard from '@/components/ProductCard';
+import { db } from '@/lib/firebase';
+import { doc, onSnapshot, updateDoc, increment, setDoc, getDoc } from 'firebase/firestore';
 
 export default function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
@@ -25,8 +27,85 @@ function ProductDetail({ product }: { product: (typeof products)[0] }) {
   const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
 
+  // Real-time Views State
+  const [liveViews, setLiveViews] = useState<number | null>(null);
+  const scrollRef = useRef<boolean>(false);
+
+  // Brewing Timer State
+  const [timerLeft, setTimerLeft] = useState<number | null>(null);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
   // Get 2 random testimonials for this product
   const productReviews = testimonials.slice(0, 2);
+
+  // Real-time Views Sync
+  useEffect(() => {
+    if (!db || !product.slug) return;
+
+    const statsDocRef = doc(db, 'product_stats', product.slug);
+
+    // 1. Ensure doc exists and increment
+    const syncView = async () => {
+      try {
+        const docSnap = await getDoc(statsDocRef);
+        if (!docSnap.exists()) {
+          await setDoc(statsDocRef, { current_views: 1 });
+        } else {
+          await updateDoc(statsDocRef, { current_views: increment(1) });
+        }
+      } catch (e) {
+        console.error('Error incrementing view:', e);
+      }
+    };
+
+    syncView();
+
+    // 2. Listen for real-time updates
+    const unsubscribe = onSnapshot(statsDocRef, (doc) => {
+      if (doc.exists()) {
+        setLiveViews(doc.data().current_views);
+      }
+    });
+
+    // 3. Decrement on leave
+    return () => {
+      unsubscribe();
+      updateDoc(statsDocRef, { current_views: increment(-1) }).catch(e => console.error('Error decrementing:', e));
+    };
+  }, [product.slug]);
+
+  // Brewing Timer Logic
+  const startTimer = () => {
+    // Presets: Assam 4m (240s), Green 2m (120s), Rose 3m (180s), Other 3m
+    const preset = product.category.toLowerCase().includes('green') ? 120 
+                 : product.category.toLowerCase().includes('assam') ? 240
+                 : product.category.toLowerCase().includes('rose') ? 180 : 180;
+    
+    setTimerLeft(preset);
+    setIsTimerRunning(true);
+  };
+
+  useEffect(() => {
+    if (isTimerRunning && timerLeft && timerLeft > 0) {
+      timerIntervalRef.current = setInterval(() => {
+        setTimerLeft(prev => (prev && prev > 0 ? prev - 1 : 0));
+      }, 1000);
+    } else if (timerLeft === 0) {
+      setIsTimerRunning(false);
+      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    }
+
+    return () => {
+      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    };
+  }, [isTimerRunning, timerLeft]);
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  };
 
   const handleAddToCart = () => {
     for (let i = 0; i < quantity; i++) {
@@ -104,6 +183,69 @@ function ProductDetail({ product }: { product: (typeof products)[0] }) {
               <span className="text-brand-800/50 text-base">{product.rating} ({product.reviews} reviews)</span>
             </div>
 
+            {/* Scarcity & Social Proof (LIVE DATA) */}
+            <div className="flex flex-col gap-2 mb-8">
+              <div className="flex items-center gap-2 text-red-600 font-semibold text-sm">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                </span>
+                Highly in demand — limited batches available!
+              </div>
+              {liveViews !== null && (
+                <div className="flex items-center gap-2 text-brand-800/60 text-sm italic transition-opacity duration-500">
+                  🔥 <span className="font-bold text-brand-950">{liveViews} people</span> are viewing this right now
+                </div>
+              )}
+            </div>
+
+            {/* Brewing Timer (NEW) */}
+            <div className="mb-8 p-6 bg-white rounded-3xl shadow-lg border border-gold-400/20 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gold-400/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-display text-lg font-bold text-brand-900 flex items-center gap-2">
+                    ⏱️ Perfect Brew Timer
+                  </h3>
+                  {isTimerRunning && (
+                    <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                  )}
+                </div>
+                
+                {timerLeft !== null ? (
+                  <div className="flex items-center justify-between">
+                    <div className="flex flex-col">
+                      <span className="text-4xl font-display font-bold text-brand-900 tabular-nums">
+                        {formatTime(timerLeft)}
+                      </span>
+                      <span className="text-xs font-bold text-brand-800/40 uppercase tracking-widest mt-1">
+                        {timerLeft > 0 ? 'Steeping...' : 'Tea is Ready! 🍵'}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setIsTimerRunning(false);
+                        setTimerLeft(null);
+                      }}
+                      className="px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm font-bold hover:bg-red-100 transition-colors"
+                    >
+                      Reset
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={startTimer}
+                    className="w-full py-4 rounded-2xl bg-gold-50 text-gold-700 font-bold text-sm hover:bg-gold-100 transition-all border border-gold-400/20 flex items-center justify-center gap-2"
+                  >
+                    Start {product.category.includes('Green') ? '2m' : product.category.includes('Assam') ? '4m' : '3m'} Brew Timer
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            </div>
+
             {/* Mobile Image (Visible only on small screens, AFTER Title/Rating, BEFORE Price) */}
             <div className="lg:hidden relative w-full h-[400px] sm:h-[500px] rounded-[2rem] overflow-hidden shadow-xl bg-white mb-6">
               <Image
@@ -140,26 +282,22 @@ function ProductDetail({ product }: { product: (typeof products)[0] }) {
             {/* Benefits & Trust Badges (Easy Return) */}
             <div className="grid grid-cols-2 gap-3 mb-8">
               <div className="flex items-center gap-3 p-4 rounded-2xl bg-brand-50 border border-brand-100/50">
-                <div className="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center text-brand-700 shrink-0">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                  </svg>
+                <div className="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center text-brand-700 shrink-0 text-xl">
+                  🍃
                 </div>
                 <div>
-                  <h4 className="font-bold text-brand-900 text-sm">Health Benefits</h4>
-                  <p className="text-xs text-brand-800/60 leading-tight">Rich in antioxidants</p>
+                  <h4 className="font-bold text-brand-900 text-sm">100% Organic</h4>
+                  <p className="text-xs text-brand-800/60 leading-tight">Fresh from Assam</p>
                 </div>
               </div>
               
               <div className="flex items-center gap-3 p-4 rounded-2xl bg-gold-50 border border-gold-100/50">
-                <div className="w-10 h-10 rounded-full bg-gold-100 flex items-center justify-center text-gold-700 shrink-0">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                  </svg>
+                <div className="w-10 h-10 rounded-full bg-gold-100 flex items-center justify-center text-gold-700 shrink-0 text-xl">
+                  🚚
                 </div>
                 <div>
-                  <h4 className="font-bold text-brand-900 text-sm">Easy Returns</h4>
-                  <p className="text-xs text-brand-800/60 leading-tight">7-day hassle free</p>
+                  <h4 className="font-bold text-brand-900 text-sm">Fast Delivery</h4>
+                  <p className="text-xs text-brand-800/60 leading-tight">Free above ₹499</p>
                 </div>
               </div>
             </div>
