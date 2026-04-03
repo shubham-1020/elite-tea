@@ -138,7 +138,7 @@ export default function HeroCarousel() {
                 filter: i === active ? 'none' : 'blur(4px)',
                 transition: 'filter 0.7s ease-out, transform 0.7s ease-out'
               }}
-              sizes="100vw"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 100vw"
               priority={i === 0}
               loading={i === 0 ? "eager" : "lazy"}
               quality={80}
@@ -229,7 +229,7 @@ export default function HeroCarousel() {
           <button
             key={i}
             onClick={() => setActive(i)}
-            className="group relative flex flex-col items-center gap-2"
+            className="group relative flex flex-col items-center justify-center p-3 -m-3" // Expand hit area (48px inclusive)
             aria-label={`Go to slide: ${slide.title}`}
           >
             <div className={`h-1 rounded-full transition-all duration-500 ${

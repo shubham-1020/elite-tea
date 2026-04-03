@@ -31,16 +31,20 @@ export default function FallingLeaves() {
   useEffect(() => {
     const width = window.innerWidth;
     const height = window.innerHeight;
+    const isMobile = width < 768;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setWindowSize({ width, height });
+    
+    // Emil Kowalski performance principle: Reduce density on mobile (12 -> 6)
+    const leafCount = isMobile ? 6 : 12;
     
     // Generate leaves once when mounted
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLeaves(
-      Array.from({ length: 12 }).map((_, i) => ({
+      Array.from({ length: leafCount }).map((_, i) => ({
         id: i,
         xOffset: Math.random() * width,
-        size: Math.random() * 20 + 15,
+        size: Math.random() * (isMobile ? 15 : 20) + 15, // Slightly smaller on mobile
         duration: Math.random() * 8 + 10,
         delay: Math.random() * 5,
         rotationStart: Math.random() * 360,
@@ -60,7 +64,7 @@ export default function FallingLeaves() {
   if (!mounted || leaves.length === 0) return null;
 
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0" aria-hidden="true">
       {leaves.map((leaf) => (
         <motion.div
           key={leaf.id}
@@ -69,6 +73,7 @@ export default function FallingLeaves() {
             left: leaf.xOffset,
             width: leaf.size,
             height: leaf.size,
+            willChange: 'transform, opacity' // Hardware acceleration hint
           }}
           initial={{ y: -100, rotate: leaf.rotationStart, opacity: 0 }}
           animate={{

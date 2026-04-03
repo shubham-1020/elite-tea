@@ -259,8 +259,8 @@ export default function Navbar() {
             <div className="flex items-center gap-2 md:hidden">
               <Link
                 href="/cart"
-                className="relative w-9 h-9 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors"
-                aria-label="View Cart"
+                className="relative w-12 h-12 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors" // Expanded to 48px
+                aria-label={`${itemCount} items in cart. Click to view.`}
               >
                 <svg className="w-5.5 h-5.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
@@ -276,11 +276,12 @@ export default function Navbar() {
               <button
                 id="mobile-menu-btn"
                 onClick={() => setIsMobileOpen(!isMobileOpen)}
-                className="relative w-9 h-9 flex flex-col justify-center items-center gap-1.5 rounded-lg hover:bg-white/10 transition-colors"
-                aria-label="Toggle menu"
+                className="relative w-12 h-12 flex flex-col justify-center items-center gap-1.5 rounded-lg hover:bg-white/10 transition-colors" // Expanded to 48px
+                aria-expanded={isMobileOpen}
+                aria-label={isMobileOpen ? "Close main navigation menu" : "Open main navigation menu"}
               >
                 <span
-                  className={`block w-5 h-[1.5px] bg-white transition-all origin-center duration-300 ${
+                  className={`block w-6 h-[1.5px] bg-white transition-all origin-center duration-300 ${
                     isMobileOpen ? 'rotate-45 translate-y-[4.5px]' : ''
                   }`}
                 />
@@ -346,7 +347,7 @@ export default function Navbar() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setIsMobileOpen(false)}
-                className="text-white/75 hover:text-white font-display text-lg tracking-wide transition-colors p-3 rounded-xl hover:bg-white/5 active:bg-white/10"
+                className="text-white/75 hover:text-white font-display text-lg tracking-wide transition-colors py-4 px-3 rounded-xl hover:bg-white/5 active:bg-white/10 flex items-center min-h-[48px]" // Min-height 48px
               >
                 {link.label}
               </Link>
