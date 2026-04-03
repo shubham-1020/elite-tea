@@ -179,15 +179,16 @@ export default function Navbar() {
                   </span>
                 </button>
 
-                {/* Profile Dropdown */}
+                // Origin-aware enter/exit animations
                 <AnimatePresence>
                   {showProfileMenu && (
                     <motion.div 
                       className="absolute right-0 top-[calc(100%+8px)] w-56 bg-white rounded-2xl shadow-2xl border border-brand-100/50 overflow-hidden py-2"
-                      initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                      initial={{ opacity: 0, scale: 0.95, y: -8 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                      transition={{ duration: 0.2 }}
+                      exit={{ opacity: 0, scale: 0.95, y: -8 }}
+                      transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }} 
+                      style={{ transformOrigin: 'top right' }}
                     >
                       <div className="px-4 py-3 border-b border-brand-100/50">
                         <p className="text-brand-900 font-semibold text-sm truncate">{profile.name || 'Guest'}</p>

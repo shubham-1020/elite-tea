@@ -6,6 +6,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import PhoneAuth from '@/components/PhoneAuth';
+import ExitIntentPopup from '@/components/ExitIntentPopup';
 
 const playfair = Playfair_Display({
   subsets: ['latin'],
@@ -154,6 +155,7 @@ export default function RootLayout({
           <CartProvider>
             <Navbar />
             <PhoneAuth />
+            <ExitIntentPopup />
             <div className="flex-1 w-full overflow-x-hidden relative">
               <main id="main-content">{children}</main>
             </div>

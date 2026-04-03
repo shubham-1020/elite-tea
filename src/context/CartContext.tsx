@@ -59,10 +59,36 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setIsHydrated(true);
   }, []);
 
-  // Save cart to localStorage
+  // Save cart to local storage and sync to Firestore for Automation
   useEffect(() => {
     if (isHydrated) {
       localStorage.setItem('elite-tea-cart', JSON.stringify(items));
+      
+      // Sync to Firestore if user is logged in (for Abandoned Cart Automation)
+      const syncCartToCloud = async () => {
+        const { getAuth } = await import('firebase/auth');
+        const { doc, setDoc, serverTimestamp } = await import('firebase/firestore');
+        const { db } = await import('@/lib/firebase');
+        const auth = getAuth();
+        const user = auth.currentUser;
+
+        if (db && user && items.length > 0) {
+          const cartRef = doc(db, 'carts', user.uid);
+          await setDoc(cartRef, {
+            items: items.map(i => ({
+              productId: i.product.id,
+              name: i.product.name,
+              qty: i.quantity,
+              weight: i.selectedWeight,
+              price: i.selectedPrice
+            })),
+            lastUpdated: serverTimestamp(),
+            status: 'active'
+          }, { merge: true });
+        }
+      };
+      
+      syncCartToCloud().catch(console.error);
     }
   }, [items, isHydrated]);
 

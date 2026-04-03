@@ -111,7 +111,7 @@ export default function ProductCard({ product }: { product: Product }) {
           <button
             onClick={handleAddToCart}
             id={`add-to-cart-${product.slug}`}
-            className="bg-gradient-to-r from-brand-700 to-brand-800 text-white p-4 rounded-xl hover:from-brand-800 hover:to-brand-900 transition-all transform hover:scale-110 shadow-lg shadow-brand-900/15 active:scale-95 flex items-center justify-center gap-2"
+            className="bg-gradient-to-r from-brand-700 to-brand-800 text-white p-4 rounded-xl hover:from-brand-800 hover:to-brand-900 transition-[transform,background-color,shadow] duration-200 ease-out hover:scale-105 shadow-lg shadow-brand-900/15 active:scale-[0.97] flex items-center justify-center gap-2"
             aria-label={`Add ${product.name} to cart`}
           >
             <span className="font-semibold text-sm hidden sm:block">Add</span>

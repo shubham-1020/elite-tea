@@ -125,7 +125,7 @@ export default function HeroCarousel() {
         {slides.map((slide, i) => (
           <div
             key={i}
-            className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
+            className="absolute inset-0 transition-opacity duration-700 ease-out"
             style={{ opacity: i === active ? 1 : 0 }}
           >
             <Image
@@ -134,7 +134,9 @@ export default function HeroCarousel() {
               fill
               className="object-cover will-change-transform"
               style={{
-                transform: `scale(${scrollValues.imageScale})`,
+                transform: `scale(${i === active ? scrollValues.imageScale : 1.05})`,
+                filter: i === active ? 'none' : 'blur(4px)',
+                transition: 'filter 0.7s ease-out, transform 0.7s ease-out'
               }}
               sizes="100vw"
               priority={i === 0}
@@ -170,10 +172,11 @@ export default function HeroCarousel() {
           </span>
         </div>
 
-        {/* Title */}
+        {/* Title (Stagger 1) */}
         <h1
           key={`title-${active}`}
           className="font-display text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold text-white leading-[1.1] mb-6 animate-fade-in"
+          style={{ animationDelay: '30ms' }}
         >
           {slides[active].title.includes('Elite') ? (
             <>
@@ -186,21 +189,21 @@ export default function HeroCarousel() {
           )}
         </h1>
 
-        {/* Subtitle */}
+        {/* Subtitle (Stagger 2) */}
         <p
           key={`sub-${active}`}
           className="text-white/65 text-lg sm:text-xl max-w-2xl mx-auto mb-10 animate-fade-in leading-relaxed"
-          style={{ animationDelay: '0.15s' }}
+          style={{ animationDelay: '80ms' }}
         >
           {slides[active].subtitle}
         </p>
 
-        {/* CTAs */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+        {/* CTAs (Stagger 3) */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in" style={{ animationDelay: '130ms' }}>
           <Link
             href="/products"
             id="hero-order-btn"
-            className="group flex items-center gap-3 bg-gradient-to-r from-gold-500 to-gold-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:from-gold-600 hover:to-gold-700 transition-all transform hover:scale-105 shadow-2xl shadow-gold-500/25"
+            className="group flex items-center gap-3 bg-gradient-to-r from-gold-500 to-gold-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:from-gold-600 hover:to-gold-700 transition-all transform hover:scale-105 active:scale-[0.97] shadow-2xl shadow-gold-500/25"
           >
             Explore Our Teas
             <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
