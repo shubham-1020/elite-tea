@@ -65,7 +65,7 @@ export default function Navbar() {
           top: isMobileScreen ? 8 : (isScrolled ? 12 : 24),
           left: isMobileScreen ? 12 : (isScrolled ? 12 : 24),
           right: isMobileScreen ? 12 : (isScrolled ? 12 : 24),
-          maxWidth: isScrolled ? '900px' : '1200px',
+          maxWidth: isScrolled ? '1100px' : '1200px',
           borderRadius: 9999,
           backgroundColor: isScrolled ? 'rgba(6, 18, 10, 0.85)' : 'rgba(6, 18, 10, 0.25)',
           borderColor: isScrolled ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.03)',
@@ -128,7 +128,7 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-1 shrink-0">
+          <div className="hidden md:flex items-center gap-4 shrink-0">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -179,7 +179,7 @@ export default function Navbar() {
                   </span>
                 </button>
 
-                // Origin-aware enter/exit animations
+
                 <AnimatePresence>
                   {showProfileMenu && (
                     <motion.div 
@@ -250,7 +250,7 @@ export default function Navbar() {
             <Link
               href="/products"
               id="nav-order-btn"
-              className="hidden md:flex items-center gap-2 bg-gradient-to-r from-gold-400 to-gold-500 text-brand-900 px-5 py-2 rounded-full text-sm font-bold shadow-lg hover:shadow-gold-500/25 transition-all transform hover:scale-105"
+              className="hidden md:flex items-center gap-2 bg-gradient-to-r from-gold-400 to-gold-500 text-brand-900 px-6 py-2.5 rounded-full text-sm font-bold shadow-xl hover:shadow-gold-500/30 transition-all transform hover:scale-105"
             >
               Order Now
             </Link>
