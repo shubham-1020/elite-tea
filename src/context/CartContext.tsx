@@ -43,9 +43,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const savedCoupon = localStorage.getItem('elite-tea-coupon');
     if (savedCart) {
       try {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setItems(JSON.parse(savedCart));
+        const parsed = JSON.parse(savedCart);
+        if (Array.isArray(parsed)) {
+          setItems(parsed);
+        } else {
+          setItems([]);
+        }
       } catch {
+        setItems([]);
         localStorage.removeItem('elite-tea-cart');
       }
     }

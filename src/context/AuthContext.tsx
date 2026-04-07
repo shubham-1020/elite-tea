@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { onAuthChange, signOut as firebaseSignOut, isFirebaseConfigured, db, type User } from '@/lib/firebase';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { UserProfile, Address } from '@/types';
+import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
   user: User | null;
@@ -33,14 +34,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   const isDemoMode = !isFirebaseConfigured;
+  const router = useRouter();
+
+  const sanitizeProfile = useCallback((data: any): UserProfile => {
+    return {
+      ...data,
+      addresses: Array.isArray(data.addresses) ? data.addresses : [],
+      selectedAddressId: data.selectedAddressId || null,
+    };
+  }, []);
 
   // Load profile from localStorage initially for fast render
   useEffect(() => {
     const saved = localStorage.getItem(PROFILE_STORAGE_KEY);
     if (saved) {
       try {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setProfile(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        setProfile(sanitizeProfile(parsed));
       } catch {
         localStorage.removeItem(PROFILE_STORAGE_KEY);
       }
@@ -83,18 +93,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   await setDoc(docRef, data, { merge: true });
                 }
 
-                setProfile(data);
-                localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(data));
+                const sanitized = sanitizeProfile(data);
+                setProfile(sanitized);
+                localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(sanitized));
               } else {
                 // Create basic profile from Firebase user
-                const newProfile: UserProfile = {
+                const newProfile = sanitizeProfile({
                   uid: firebaseUser.uid,
                   phone: firebaseUser.phoneNumber || '',
                   name: firebaseUser.displayName || '',
                   email: firebaseUser.email || '',
-                  addresses: [],
-                  selectedAddressId: null,
-                };
+                });
                 setProfile(newProfile);
                 localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(newProfile));
                 
@@ -121,16 +130,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     setProfile((prev) => {
       const nextProfile = prev
-        ? { ...prev, ...data }
-        : {
+        ? sanitizeProfile({ ...prev, ...data })
+        : sanitizeProfile({
             uid: 'demo-user',
             phone: '',
             name: '',
             email: '',
-            addresses: [],
-            selectedAddressId: null,
             ...data,
-          };
+          });
       
       updatedProfile = nextProfile;
       localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(nextProfile));
@@ -156,7 +163,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       id: 'addr-' + Date.now(),
     };
 
-    const newAddresses = [...(profile.addresses || []), newAddress].slice(0, 5);
+    const currentAddresses = profile.addresses || [];
+    const newAddresses = [...currentAddresses, newAddress].slice(0, 5);
     await updateProfile({ 
       addresses: newAddresses,
       selectedAddressId: profile.selectedAddressId || newAddress.id 
@@ -164,7 +172,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [profile, updateProfile]);
 
   const updateAddress = useCallback(async (id: string, address: Partial<Address>) => {
-    if (!profile) return;
+    if (!profile || !profile.addresses) return;
     
     const newAddresses = profile.addresses.map(addr => 
       addr.id === id ? { ...addr, ...address } : addr
@@ -173,7 +181,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [profile, updateProfile]);
 
   const deleteAddress = useCallback(async (id: string) => {
-    if (!profile) return;
+    if (!profile || !profile.addresses) return;
     
     const newAddresses = profile.addresses.filter(addr => addr.id !== id);
     const newSelectedId = profile.selectedAddressId === id 

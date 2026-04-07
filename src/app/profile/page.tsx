@@ -190,7 +190,7 @@ export default function ProfilePage() {
                 <span className="w-8 h-8 rounded-lg bg-gold-50 flex items-center justify-center text-gold-600">📍</span>
                 Address Book
               </h3>
-              {profile.addresses.length < 5 && (
+              {(profile?.addresses?.length || 0) < 5 && (
                 <button
                   onClick={() => setIsAddingAddress(true)}
                   className="text-gold-600 font-bold text-sm hover:underline"
@@ -251,7 +251,7 @@ export default function ProfilePage() {
             )}
 
             <div className="grid sm:grid-cols-2 gap-4">
-              {profile.addresses.map((addr) => (
+              {profile?.addresses?.map((addr) => (
                 <div key={addr.id} className="p-5 bg-white rounded-2xl border border-brand-100 relative group">
                   <div className="flex justify-between items-start mb-2">
                     <span className="text-xs font-bold text-brand-900 uppercase tracking-widest">{addr.label}</span>
@@ -268,7 +268,7 @@ export default function ProfilePage() {
                   <p className="text-xs text-brand-800/40 font-medium">{addr.city}, {addr.pincode}</p>
                 </div>
               ))}
-              {profile.addresses.length === 0 && !isAddingAddress && (
+              {(profile?.addresses?.length || 0) === 0 && !isAddingAddress && (
                 <p className="col-span-2 text-center py-8 text-brand-800/30 font-medium border-2 border-dashed border-brand-100 rounded-2xl">
                   No addresses saved yet.
                 </p>

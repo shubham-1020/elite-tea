@@ -75,7 +75,8 @@ export default function CartPage() {
       });
 
       // 2. Generate WhatsApp message and redirect
-      const selectedAddr = profile.addresses.find(a => a.id === profile.selectedAddressId) || profile.addresses[0];
+      const addresses = profile?.addresses || [];
+      const selectedAddr = addresses.find(a => a.id === profile?.selectedAddressId) || addresses[0];
       
       const message = generateWhatsAppMessage(
         items,
@@ -83,8 +84,8 @@ export default function CartPage() {
         discount,
         finalTotal,
         appliedCoupon?.code,
-        profile.name || undefined,
-        profile.phone || undefined,
+        profile?.name || undefined,
+        profile?.phone || undefined,
         selectedAddr,
         paymentMethod,
         prepaidDiscount,
@@ -99,7 +100,8 @@ export default function CartPage() {
       }, 1000);
     } catch (error) {
       console.error('Failed to save order history:', error);
-      const selectedAddr = profile?.addresses.find(a => a.id === profile.selectedAddressId) || profile?.addresses[0];
+      const addresses = profile?.addresses || [];
+      const selectedAddr = addresses.find(a => a.id === profile?.selectedAddressId) || addresses[0];
       const message = generateWhatsAppMessage(items, subtotal, discount, finalTotal, appliedCoupon?.code, profile?.name || undefined, profile?.phone || undefined, selectedAddr, paymentMethod, prepaidDiscount, shippingFee, codCharge);
       window.open(getWhatsAppUrl(message), '_blank');
       
@@ -112,7 +114,7 @@ export default function CartPage() {
     }
   };
 
-  if (items.length === 0) {
+  if (!items || items.length === 0) {
     return (
       <div className="min-h-screen bg-cream pt-28 pb-20 flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-4">
@@ -298,7 +300,7 @@ export default function CartPage() {
                 <div className="mb-6">
                   <div className="flex items-center justify-between mb-3">
                     <label className="text-sm font-semibold text-brand-900">Delivery Address</label>
-                    {profile.addresses.length < 5 && !isAddingAddress && (
+                    {(profile?.addresses?.length || 0) < 5 && !isAddingAddress && (
                       <button 
                         onClick={() => setIsAddingAddress(true)}
                         className="text-gold-600 text-xs font-bold hover:underline"
@@ -358,21 +360,21 @@ export default function CartPage() {
                         </button>
                       </div>
                     </div>
-                  ) : profile.addresses.length > 0 ? (
+                  ) : (profile?.addresses?.length || 0) > 0 ? (
                     <div className="space-y-2">
-                      {profile.addresses.map((addr) => (
+                      {profile?.addresses?.map((addr) => (
                         <button
                           key={addr.id}
                           onClick={() => selectAddress(addr.id)}
                           className={`w-full text-left p-3 rounded-xl border transition-all ${
-                            profile.selectedAddressId === addr.id
+                            profile?.selectedAddressId === addr.id
                               ? 'bg-green-50 border-green-200 shadow-sm'
                               : 'bg-white border-brand-100 hover:border-brand-200'
                           }`}
                         >
                           <div className="flex items-center justify-between">
                             <span className="text-xs font-bold text-brand-900">{addr.label}</span>
-                            {profile.selectedAddressId === addr.id && (
+                            {profile?.selectedAddressId === addr.id && (
                               <span className="text-[10px] bg-green-600 text-white px-2 py-0.5 rounded-full">Selected</span>
                             )}
                           </div>
