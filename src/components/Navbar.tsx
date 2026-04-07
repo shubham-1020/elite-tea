@@ -193,8 +193,10 @@ export default function Navbar() {
                       <div className="px-4 py-3 border-b border-brand-100/50">
                         <p className="text-brand-900 font-semibold text-sm truncate">{profile.name || 'Guest'}</p>
                         <p className="text-brand-800/40 text-xs truncate">{profile.phone}</p>
-                        {profile.locationAddress && (
-                          <p className="text-brand-800/30 text-xs truncate mt-0.5">📍 {profile.city || profile.locationAddress}</p>
+                        {profile.addresses.length > 0 && (
+                          <p className="text-brand-800/30 text-xs truncate mt-0.5">
+                            📍 {profile.addresses.find(a => a.id === profile.selectedAddressId)?.city || profile.addresses[0].city}
+                          </p>
                         )}
                       </div>
                       <Link

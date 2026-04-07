@@ -3,20 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { onAuthChange, signOut as firebaseSignOut, isFirebaseConfigured, db, type User } from '@/lib/firebase';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
-
-export interface UserProfile {
-  uid: string;
-  phone: string;
-  name: string;
-  email: string;
-  address: string;
-  city: string;
-  state: string;
-  pincode: string;
-  latitude: number | null;
-  longitude: number | null;
-  locationAddress: string;
-}
+import { UserProfile, Address } from '@/types';
 
 interface AuthContextType {
   user: User | null;
@@ -26,6 +13,10 @@ interface AuthContextType {
   openAuthModal: () => void;
   closeAuthModal: () => void;
   updateProfile: (data: Partial<UserProfile>) => Promise<void>;
+  addAddress: (address: Omit<Address, 'id'>) => Promise<void>;
+  updateAddress: (id: string, address: Partial<Address>) => Promise<void>;
+  deleteAddress: (id: string) => Promise<void>;
+  selectAddress: (id: string) => Promise<void>;
   logout: () => Promise<void>;
   isDemoMode: boolean;
   demoLogin: (phone: string) => void;
@@ -70,7 +61,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               const docSnap = await getDoc(docRef);
               
               if (docSnap.exists()) {
-                const data = docSnap.data() as UserProfile;
+                let data = docSnap.data() as UserProfile;
+                
+                // MIGRATION: Convert legacy fields to addresses array
+                if ((!data.addresses || data.addresses.length === 0) && data.address) {
+                  const migratedAddress: Address = {
+                    id: 'addr-' + Date.now(),
+                    label: 'Default Address',
+                    address: data.address,
+                    city: data.city || '',
+                    state: data.state || '',
+                    pincode: data.pincode || '',
+                    isDefault: true,
+                  };
+                  data = {
+                    ...data,
+                    addresses: [migratedAddress],
+                    selectedAddressId: migratedAddress.id,
+                  };
+                  // Persist migrated state
+                  await setDoc(docRef, data, { merge: true });
+                }
+
                 setProfile(data);
                 localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(data));
               } else {
@@ -80,13 +92,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   phone: firebaseUser.phoneNumber || '',
                   name: firebaseUser.displayName || '',
                   email: firebaseUser.email || '',
-                  address: '',
-                  city: '',
-                  state: '',
-                  pincode: '',
-                  latitude: null,
-                  longitude: null,
-                  locationAddress: '',
+                  addresses: [],
+                  selectedAddressId: null,
                 };
                 setProfile(newProfile);
                 localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(newProfile));
@@ -120,13 +127,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             phone: '',
             name: '',
             email: '',
-            address: '',
-            city: '',
-            state: '',
-            pincode: '',
-            latitude: null,
-            longitude: null,
-            locationAddress: '',
+            addresses: [],
+            selectedAddressId: null,
             ...data,
           };
       
@@ -146,6 +148,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [isDemoMode]);
 
+  const addAddress = useCallback(async (address: Omit<Address, 'id'>) => {
+    if (!profile) return;
+    
+    const newAddress: Address = {
+      ...address,
+      id: 'addr-' + Date.now(),
+    };
+
+    const newAddresses = [...(profile.addresses || []), newAddress].slice(0, 5);
+    await updateProfile({ 
+      addresses: newAddresses,
+      selectedAddressId: profile.selectedAddressId || newAddress.id 
+    });
+  }, [profile, updateProfile]);
+
+  const updateAddress = useCallback(async (id: string, address: Partial<Address>) => {
+    if (!profile) return;
+    
+    const newAddresses = profile.addresses.map(addr => 
+      addr.id === id ? { ...addr, ...address } : addr
+    );
+    await updateProfile({ addresses: newAddresses });
+  }, [profile, updateProfile]);
+
+  const deleteAddress = useCallback(async (id: string) => {
+    if (!profile) return;
+    
+    const newAddresses = profile.addresses.filter(addr => addr.id !== id);
+    const newSelectedId = profile.selectedAddressId === id 
+      ? (newAddresses.length > 0 ? newAddresses[0].id : null)
+      : profile.selectedAddressId;
+
+    await updateProfile({ 
+      addresses: newAddresses,
+      selectedAddressId: newSelectedId
+    });
+  }, [profile, updateProfile]);
+
+  const selectAddress = useCallback(async (id: string) => {
+    await updateProfile({ selectedAddressId: id });
+  }, [updateProfile]);
+
   const logout = useCallback(async () => {
     if (!isDemoMode) {
       await firebaseSignOut();
@@ -161,13 +205,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       phone: `+91${phone}`,
       name: '',
       email: '',
-      address: '',
-      city: '',
-      state: '',
-      pincode: '',
-      latitude: null,
-      longitude: null,
-      locationAddress: '',
+      addresses: [],
+      selectedAddressId: null,
     };
     setProfile(demoProfile);
     localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(demoProfile));
@@ -187,6 +226,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         openAuthModal,
         closeAuthModal,
         updateProfile,
+        addAddress,
+        updateAddress,
+        deleteAddress,
+        selectAddress,
         logout,
         isDemoMode,
         demoLogin,

@@ -33,6 +33,33 @@ export interface CouponCode {
   description: string;
 }
 
+export interface Address {
+  id: string;
+  label: string; // e.g. "Home", "Work"
+  address: string;
+  city: string;
+  state: string;
+  pincode: string;
+  isDefault?: boolean;
+}
+
+export interface UserProfile {
+  uid: string;
+  phone: string;
+  name: string;
+  email: string;
+  addresses: Address[];
+  selectedAddressId: string | null;
+  // Legacy fields for migration
+  address?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  locationAddress?: string;
+}
+
 export interface Testimonial {
   id: number;
   name: string;

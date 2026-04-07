@@ -262,18 +262,23 @@ export default function PhoneAuth() {
       demoLogin(phone);
     }
 
+    const initialAddress: any = {
+      id: 'addr-' + Date.now(),
+      label: 'Home',
+      address: address.trim(),
+      city: city.trim(),
+      state: state.trim(),
+      pincode: pincode.trim(),
+      isDefault: true,
+    };
+
     try {
       await updateProfile({
         phone: phone.startsWith('+91') ? phone : `+91${phone}`,
         name: name.trim(),
         email: email.trim(),
-        address: address.trim(),
-        city: city.trim(),
-        state: state.trim(),
-        pincode: pincode.trim(),
-        latitude: coords?.lat || null,
-        longitude: coords?.lng || null,
-        locationAddress,
+        addresses: [initialAddress],
+        selectedAddressId: initialAddress.id,
       });
 
       closeAuthModal();

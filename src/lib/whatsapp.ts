@@ -1,5 +1,4 @@
-import { CartItem } from '@/types';
-import { UserProfile } from '@/context/AuthContext';
+import { CartItem, Address } from '@/types';
 
 const WHATSAPP_NUMBER = '917811081552';
 
@@ -11,12 +10,11 @@ export function generateWhatsAppMessage(
   couponCode?: string,
   customerName?: string,
   customerPhone?: string,
-  profile?: UserProfile | null,
-  paymentMethod?: 'prepaid' | 'cod',
+  selectedAddress?: Address | null,
+  paymentMethod: 'prepaid' | 'cod' = 'prepaid',
   prepaidDiscount?: number,
   shippingFee?: number,
   codCharge?: number
-
 ): string {
   let message = `🍵 *NEW ORDER - ELITE TEA*\n`;
   message += `╔══════════════════╗\n`;
@@ -51,30 +49,22 @@ export function generateWhatsAppMessage(
   message += `🔥 *TOTAL AMOUNT: ₹${total}*\n`;
   message += `──────────────────\n\n`;
 
-  // Use profile data if available, fallback to manual inputs
-  const name = profile?.name || customerName;
-  const phone = profile?.phone || customerPhone;
-
   message += `╔══════════════════╗\n`;
   message += `  *CUSTOMER INFO*\n`;
   message += `╚══════════════════╝\n`;
 
-  if (name) message += `👤 *Name:* ${name}\n`;
-  if (phone) message += `📞 *Phone:* ${phone}\n`;
+  if (customerName) message += `👤 *Name:* ${customerName}\n`;
+  if (customerPhone) message += `📞 *Phone:* ${customerPhone}\n`;
 
-  // Include address & location from profile
-  if (profile?.address || profile?.city) {
+  // Include address from selected address
+  if (selectedAddress) {
     const addressParts = [
-      profile.address,
-      profile.city,
-      profile.state,
-      profile.pincode,
+      selectedAddress.address,
+      selectedAddress.city,
+      selectedAddress.state,
+      selectedAddress.pincode,
     ].filter(Boolean);
     message += `📍 *Address:* ${addressParts.join(', ')}\n`;
-  }
-
-  if (profile?.latitude && profile?.longitude) {
-    message += `🗺️ *Location:* https://maps.google.com/?q=${profile.latitude},${profile.longitude}\n`;
   }
 
   message += `\n✨ *Please confirm my order. Thank you!*`;

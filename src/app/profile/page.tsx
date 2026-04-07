@@ -1,28 +1,35 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth, UserProfile } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { getUserOrders, Order } from '@/lib/orders';
+import { UserProfile, Address } from '@/types';
 
 export default function ProfilePage() {
-  const { profile, updateProfile, isLoading, user } = useAuth();
+  const { profile, updateProfile, addAddress, deleteAddress, isLoading, user } = useAuth();
   const router = useRouter();
 
   const [formData, setFormData] = useState<Partial<UserProfile>>({
     name: '',
     email: '',
-    address: '',
-    city: '',
-    state: '',
-    pincode: '',
   });
 
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [orders, setOrders] = useState<Order[]>([]);
   const [isOrdersLoading, setIsOrdersLoading] = useState(true);
+
+  // Address Form State
+  const [isAddingAddress, setIsAddingAddress] = useState(false);
+  const [addressForm, setAddressForm] = useState<Omit<Address, 'id'>>({
+    label: '',
+    address: '',
+    city: '',
+    state: '',
+    pincode: '',
+  });
 
   // Redirect if not logged in after loading
   useEffect(() => {
@@ -37,10 +44,6 @@ export default function ProfilePage() {
       setFormData({
         name: profile.name || '',
         email: profile.email || '',
-        address: profile.address || '',
-        city: profile.city || '',
-        state: profile.state || '',
-        pincode: profile.pincode || '',
       });
     }
   }, [profile]);
@@ -85,6 +88,17 @@ export default function ProfilePage() {
     }
   };
 
+  const handleAddAddress = async () => {
+    if (!addressForm.address || !addressForm.city) return;
+    try {
+      await addAddress(addressForm);
+      setIsAddingAddress(false);
+      setAddressForm({ label: '', address: '', city: '', state: '', pincode: '' });
+    } catch (error) {
+      console.error('Failed to add address:', error);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-cream flex items-center justify-center">
@@ -122,10 +136,9 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Form */}
+          {/* Personal Info Form */}
           <form onSubmit={handleSubmit} className="p-8 sm:p-12">
             <div className="grid sm:grid-cols-2 gap-6 mb-10">
-              {/* Basic Info */}
               <div className="col-span-2">
                 <h3 className="text-lg font-bold text-brand-900 mb-6 flex items-center gap-2">
                   <span className="w-8 h-8 rounded-lg bg-brand-50 flex items-center justify-center text-brand-600">👤</span>
@@ -156,98 +169,112 @@ export default function ProfilePage() {
                   className="w-full px-5 py-3.5 rounded-2xl bg-brand-50/50 border border-brand-100 focus:bg-white focus:border-gold-500 transition-all outline-none text-brand-900 font-medium"
                 />
               </div>
-
-              {/* Address Info */}
-              <div className="col-span-2 mt-4">
-                <h3 className="text-lg font-bold text-brand-900 mb-6 flex items-center gap-2">
-                  <span className="w-8 h-8 rounded-lg bg-gold-50 flex items-center justify-center text-gold-600">📍</span>
-                  Default Delivery Address
-                </h3>
-              </div>
-
-              <div className="col-span-2 space-y-1">
-                <label className="text-xs font-bold text-brand-900/40 uppercase tracking-wider ml-1">Building / Street / Area</label>
-                <textarea
-                  name="address"
-                  value={formData.address}
-                  onChange={handleChange}
-                  placeholder="House No, Street name, Landmark..."
-                  rows={2}
-                  className="w-full px-5 py-3.5 rounded-2xl bg-brand-50/50 border border-brand-100 focus:bg-white focus:border-gold-500 transition-all outline-none text-brand-900 resize-none font-medium"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-brand-900/40 uppercase tracking-wider ml-1">City</label>
-                <input
-                  type="text"
-                  name="city"
-                  value={formData.city}
-                  onChange={handleChange}
-                  placeholder="e.g. Guwahati"
-                  className="w-full px-5 py-3.5 rounded-2xl bg-brand-50/50 border border-brand-100 focus:bg-white focus:border-gold-500 transition-all outline-none text-brand-900 font-medium"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-brand-900/40 uppercase tracking-wider ml-1">Pincode</label>
-                  <input
-                    type="text"
-                    name="pincode"
-                    value={formData.pincode}
-                    onChange={handleChange}
-                    placeholder="6-digit"
-                    className="w-full px-5 py-3.5 rounded-2xl bg-brand-50/50 border border-brand-100 focus:bg-white focus:border-gold-500 transition-all outline-none text-brand-900 font-medium"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-brand-900/40 uppercase tracking-wider ml-1">State</label>
-                  <input
-                    type="text"
-                    name="state"
-                    value={formData.state}
-                    onChange={handleChange}
-                    placeholder="e.g. Assam"
-                    className="w-full px-5 py-3.5 rounded-2xl bg-brand-50/50 border border-brand-100 focus:bg-white focus:border-gold-500 transition-all outline-none text-brand-900 font-medium"
-                  />
-                </div>
-              </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row items-center gap-6 pt-8 border-t border-brand-100/50">
+            <div className="flex items-center gap-4 pt-8 border-t border-brand-100/50">
               <button
                 type="submit"
                 disabled={isSaving}
-                className={`w-full sm:w-auto min-w-[200px] flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-bold text-lg transition-all transform active:scale-95 shadow-xl ${
-                  isSaving
-                    ? 'bg-brand-100 text-brand-400 cursor-not-allowed'
-                    : 'bg-brand-900 text-white hover:bg-brand-800 shadow-brand-900/20'
-                }`}
+                className="bg-brand-900 text-white px-8 py-3 rounded-xl font-bold hover:bg-brand-800 transition-all disabled:opacity-50"
               >
-                {isSaving ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Updating...
-                  </>
-                ) : (
-                  'Update Profile'
-                )}
+                {isSaving ? 'Saving...' : 'Save Changes'}
               </button>
-
-              {saveStatus === 'success' && (
-                <motion.p
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="text-green-600 font-bold flex items-center gap-2"
-                >
-                  <span className="w-6 h-6 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-[10px]">✓</span>
-                  Changes saved!
-                </motion.p>
-              )}
+              {saveStatus === 'success' && <span className="text-green-600 text-sm font-bold">✓ Saved</span>}
             </div>
           </form>
+
+          {/* Address Book Section */}
+          <div className="p-8 sm:p-12 bg-brand-50/30 border-t border-brand-100/50">
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-lg font-bold text-brand-900 flex items-center gap-2">
+                <span className="w-8 h-8 rounded-lg bg-gold-50 flex items-center justify-center text-gold-600">📍</span>
+                Address Book
+              </h3>
+              {profile.addresses.length < 5 && (
+                <button
+                  onClick={() => setIsAddingAddress(true)}
+                  className="text-gold-600 font-bold text-sm hover:underline"
+                >
+                  + Add New
+                </button>
+              )}
+            </div>
+
+            {isAddingAddress && (
+              <div className="mb-8 p-6 bg-white rounded-3xl border border-gold-200 shadow-sm space-y-4">
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <input
+                    type="text"
+                    placeholder="Address Label (e.g. Home)"
+                    value={addressForm.label}
+                    onChange={(e) => setAddressForm({...addressForm, label: e.target.value})}
+                    className="w-full px-4 py-2.5 rounded-xl bg-brand-50 border border-brand-100"
+                  />
+                  <input
+                    type="text"
+                    placeholder="City"
+                    value={addressForm.city}
+                    onChange={(e) => setAddressForm({...addressForm, city: e.target.value})}
+                    className="w-full px-4 py-2.5 rounded-xl bg-brand-50 border border-brand-100"
+                  />
+                </div>
+                <textarea
+                  placeholder="Full Address"
+                  value={addressForm.address}
+                  onChange={(e) => setAddressForm({...addressForm, address: e.target.value})}
+                  className="w-full px-4 py-2.5 rounded-xl bg-brand-50 border border-brand-100 h-24"
+                />
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <input
+                    type="text"
+                    placeholder="Pincode"
+                    value={addressForm.pincode}
+                    onChange={(e) => setAddressForm({...addressForm, pincode: e.target.value})}
+                    className="w-full px-4 py-2.5 rounded-xl bg-brand-50 border border-brand-100"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleAddAddress}
+                      className="flex-1 bg-gold-500 text-white py-2.5 rounded-xl font-bold"
+                    >
+                      Save Address
+                    </button>
+                    <button
+                      onClick={() => setIsAddingAddress(false)}
+                      className="px-6 py-2.5 bg-brand-100 text-brand-900 rounded-xl font-bold"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              {profile.addresses.map((addr) => (
+                <div key={addr.id} className="p-5 bg-white rounded-2xl border border-brand-100 relative group">
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-xs font-bold text-brand-900 uppercase tracking-widest">{addr.label}</span>
+                    <button
+                      onClick={() => deleteAddress(addr.id)}
+                      className="text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  <p className="text-sm text-brand-800/70 mb-1">{addr.address}</p>
+                  <p className="text-xs text-brand-800/40 font-medium">{addr.city}, {addr.pincode}</p>
+                </div>
+              ))}
+              {profile.addresses.length === 0 && !isAddingAddress && (
+                <p className="col-span-2 text-center py-8 text-brand-800/30 font-medium border-2 border-dashed border-brand-100 rounded-2xl">
+                  No addresses saved yet.
+                </p>
+              )}
+            </div>
+          </div>
         </motion.div>
 
         {/* Order History Section */}

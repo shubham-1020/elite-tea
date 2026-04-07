@@ -7,6 +7,7 @@ import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { generateWhatsAppMessage, getWhatsAppUrl } from '@/lib/whatsapp';
 import { saveOrder } from '@/lib/orders';
+import { Address } from '@/types';
 
 export default function CartPage() {
   const {
@@ -29,12 +30,20 @@ export default function CartPage() {
     SHIPPING_THRESHOLD,
   } = useCart();
 
-  const { profile, openAuthModal, user } = useAuth();
+  const { profile, openAuthModal, user, selectAddress, addAddress } = useAuth();
 
   const [couponInput, setCouponInput] = useState('');
   const [couponMessage, setCouponMessage] = useState('');
   const [couponSuccess, setCouponSuccess] = useState(false);
   const [isOrderSaving, setIsOrderSaving] = useState(false);
+  const [isAddingAddress, setIsAddingAddress] = useState(false);
+  const [newAddress, setNewAddress] = useState<Omit<Address, 'id'>>({
+    label: '',
+    address: '',
+    city: '',
+    state: '',
+    pincode: '',
+  });
 
   const finalTotal = total;
 
@@ -66,6 +75,8 @@ export default function CartPage() {
       });
 
       // 2. Generate WhatsApp message and redirect
+      const selectedAddr = profile.addresses.find(a => a.id === profile.selectedAddressId) || profile.addresses[0];
+      
       const message = generateWhatsAppMessage(
         items,
         subtotal,
@@ -74,18 +85,28 @@ export default function CartPage() {
         appliedCoupon?.code,
         profile.name || undefined,
         profile.phone || undefined,
-        profile,
+        selectedAddr,
         paymentMethod,
         prepaidDiscount,
         shippingFee,
         codCharge
       );
       window.open(getWhatsAppUrl(message), '_blank');
+      
+      // 3. Clear Cart after redirection
+      setTimeout(() => {
+        clearCart();
+      }, 1000);
     } catch (error) {
       console.error('Failed to save order history:', error);
-      // Still open WhatsApp even if save fails, but maybe show a subtle warning
-      const message = generateWhatsAppMessage(items, subtotal, discount, finalTotal, appliedCoupon?.code, profile.name || undefined, profile.phone || undefined, profile, paymentMethod, prepaidDiscount, shippingFee, codCharge);
+      const selectedAddr = profile?.addresses.find(a => a.id === profile.selectedAddressId) || profile?.addresses[0];
+      const message = generateWhatsAppMessage(items, subtotal, discount, finalTotal, appliedCoupon?.code, profile?.name || undefined, profile?.phone || undefined, selectedAddr, paymentMethod, prepaidDiscount, shippingFee, codCharge);
       window.open(getWhatsAppUrl(message), '_blank');
+      
+      // Clear Cart even if save fails
+      setTimeout(() => {
+        clearCart();
+      }, 1000);
     } finally {
       setIsOrderSaving(false);
     }
@@ -272,6 +293,104 @@ export default function CartPage() {
             <div className="bg-white rounded-2xl p-6 shadow-lg border border-brand-100/30 sticky top-28">
               <h2 className="font-display text-xl font-bold text-brand-900 mb-6">Order Summary</h2>
 
+              {/* Address Selection */}
+              {profile && (
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="text-sm font-semibold text-brand-900">Delivery Address</label>
+                    {profile.addresses.length < 5 && !isAddingAddress && (
+                      <button 
+                        onClick={() => setIsAddingAddress(true)}
+                        className="text-gold-600 text-xs font-bold hover:underline"
+                      >
+                        + Add New
+                      </button>
+                    )}
+                  </div>
+
+                  {isAddingAddress ? (
+                    <div className="space-y-3 p-4 bg-cream/50 rounded-2xl border border-brand-200/50">
+                      <input
+                        type="text"
+                        placeholder="Label (e.g. Home)"
+                        value={newAddress.label}
+                        onChange={(e) => setNewAddress({...newAddress, label: e.target.value})}
+                        className="w-full px-3 py-2 rounded-lg border border-brand-100 text-sm"
+                      />
+                      <textarea
+                        placeholder="Address"
+                        value={newAddress.address}
+                        onChange={(e) => setNewAddress({...newAddress, address: e.target.value})}
+                        className="w-full px-3 py-2 rounded-lg border border-brand-100 text-sm"
+                      />
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          type="text"
+                          placeholder="City"
+                          value={newAddress.city}
+                          onChange={(e) => setNewAddress({...newAddress, city: e.target.value})}
+                          className="w-full px-3 py-2 rounded-lg border border-brand-100 text-sm"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Pincode"
+                          value={newAddress.pincode}
+                          onChange={(e) => setNewAddress({...newAddress, pincode: e.target.value})}
+                          className="w-full px-3 py-2 rounded-lg border border-brand-100 text-sm"
+                        />
+                      </div>
+                      <div className="flex gap-2 pt-2">
+                        <button
+                          onClick={() => {
+                            addAddress(newAddress);
+                            setIsAddingAddress(false);
+                            setNewAddress({ label: '', address: '', city: '', state: '', pincode: '' });
+                          }}
+                          className="flex-1 bg-brand-900 text-white py-2 rounded-lg text-xs font-bold"
+                        >
+                          Save Address
+                        </button>
+                        <button
+                          onClick={() => setIsAddingAddress(false)}
+                          className="px-4 py-2 border border-brand-200 rounded-lg text-xs font-bold"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : profile.addresses.length > 0 ? (
+                    <div className="space-y-2">
+                      {profile.addresses.map((addr) => (
+                        <button
+                          key={addr.id}
+                          onClick={() => selectAddress(addr.id)}
+                          className={`w-full text-left p-3 rounded-xl border transition-all ${
+                            profile.selectedAddressId === addr.id
+                              ? 'bg-green-50 border-green-200 shadow-sm'
+                              : 'bg-white border-brand-100 hover:border-brand-200'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-brand-900">{addr.label}</span>
+                            {profile.selectedAddressId === addr.id && (
+                              <span className="text-[10px] bg-green-600 text-white px-2 py-0.5 rounded-full">Selected</span>
+                            )}
+                          </div>
+                          <p className="text-[10px] text-brand-800/60 mt-1 line-clamp-1">{addr.address}, {addr.city}</p>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setIsAddingAddress(true)}
+                      className="w-full py-4 border-2 border-dashed border-brand-200 rounded-2xl text-brand-800/40 text-sm font-medium hover:border-gold-400 hover:text-gold-600 transition-all"
+                    >
+                      + Add Delivery Address
+                    </button>
+                  ) }
+                </div>
+              )}
+
               {/* User Profile Info */}
               {profile ? (
                 <div className="mb-5 p-3 bg-green-50/80 rounded-xl border border-green-200/60">
@@ -279,9 +398,6 @@ export default function CartPage() {
                     <p className="text-green-700 text-sm font-semibold">✅ Signed in</p>
                   </div>
                   <p className="text-green-600 text-xs">{profile.name || 'Guest'} • {profile.phone}</p>
-                  {profile.city && (
-                    <p className="text-green-600/70 text-xs mt-0.5">📍 {profile.city}{profile.state ? `, ${profile.state}` : ''}</p>
-                  )}
                 </div>
               ) : (
                 <button
