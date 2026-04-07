@@ -79,7 +79,7 @@ export default function Footer() {
           <div>
             <h4 className="font-display text-sm font-semibold text-gold-400 mb-5 tracking-widest uppercase">Our Teas</h4>
             <ul className="space-y-3">
-              {['Elite Assam CTC', 'Elite Green Tea', 'Elite Rose Tea', 'Elite Himalayan Churpi'].map(
+              {['Assam CTC', 'Elite Tea', 'Elite Rose Tea', 'Elite Himalayan Churpi'].map(
                 (tea) => (
                   <li key={tea}>
                     <Link

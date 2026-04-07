@@ -29,7 +29,7 @@ export default function ProductsPage() {
             Our <span className="text-gold-gradient">Collection</span>
           </h1>
           <p className="text-brand-800/60 max-w-xl mx-auto">
-            From bold Elite Assam CTC to delicate Elite Rose Tea — discover your perfect brew.
+            From bold Assam CTC to delicate Elite Tea — discover your perfect brew.
           </p>
         </div>
 

@@ -18,46 +18,49 @@ export function generateWhatsAppMessage(
   codCharge?: number
 
 ): string {
-  let message = `🍵 *New Order — Elite Tea*\n`;
-  message += `━━━━━━━━━━━━━━━━━━\n\n`;
+  let message = `🍵 *NEW ORDER - ELITE TEA*\n`;
+  message += `╔══════════════════╗\n`;
+  message += `  *ORDER DETAILS*\n`;
+  message += `╚══════════════════╝\n\n`;
 
   items.forEach((item, index) => {
     message += `${index + 1}. *${item.product.name}*\n`;
-    message += `   Weight: ${item.selectedWeight}\n`;
-    message += `   Qty: ${item.quantity}\n`;
-    message += `   Price: ₹${item.selectedPrice * item.quantity}\n\n`;
+    message += `   📦 Weight: ${item.selectedWeight}\n`;
+    message += `   🔢 Qty: ${item.quantity}\n`;
+    message += `   💰 Price: ₹${item.selectedPrice * item.quantity}\n\n`;
   });
 
-  message += `━━━━━━━━━━━━━━━━━━\n`;
-  message += `Subtotal: ₹${subtotal}\n`;
+  message += `──────────────────\n`;
+  message += `*Subtotal:* ₹${subtotal}\n`;
 
   if (discount > 0) {
-    message += `Coupon Discount${couponCode ? ` (${couponCode})` : ''}: -₹${discount}\n`;
+    message += `*Coupon code (${couponCode}):* -₹${discount}\n`;
   }
   if (paymentMethod === 'prepaid' && prepaidDiscount && prepaidDiscount > 0) {
-    message += `Prepaid Bonus (10% Off): -₹${prepaidDiscount}\n`;
+    message += `*Prepaid Benefit (10% OFF):* -₹${prepaidDiscount}\n`;
   }
   if (shippingFee && shippingFee > 0) {
-    message += `Shipping Fee: ₹${shippingFee}\n`;
+    message += `*Shipping:* ₹${shippingFee}\n`;
   }
   if (codCharge && codCharge > 0) {
-    message += `COD Handling Fee: ₹${codCharge}\n`;
+    message += `*COD Charge:* ₹${codCharge}\n`;
   }
   
-  message += `━━━━━━━━━━━━━━━━━━\n`;
-  message += `Payment Method: *${paymentMethod === 'prepaid' ? 'Prepaid / UPI' : 'Cash on Delivery'}*\n`;
-  message += `*Final Total: ₹${total}*\n\n`;
+  message += `──────────────────\n`;
+  message += `💳 *Payment:* ${paymentMethod === 'prepaid' ? 'PREPAID / UPI' : 'CASH ON DELIVERY'}\n`;
+  message += `🔥 *TOTAL AMOUNT: ₹${total}*\n`;
+  message += `──────────────────\n\n`;
 
   // Use profile data if available, fallback to manual inputs
   const name = profile?.name || customerName;
   const phone = profile?.phone || customerPhone;
 
-  if (name) {
-    message += `👤 Name: ${name}\n`;
-  }
-  if (phone) {
-    message += `📞 Phone: ${phone}\n`;
-  }
+  message += `╔══════════════════╗\n`;
+  message += `  *CUSTOMER INFO*\n`;
+  message += `╚══════════════════╝\n`;
+
+  if (name) message += `👤 *Name:* ${name}\n`;
+  if (phone) message += `📞 *Phone:* ${phone}\n`;
 
   // Include address & location from profile
   if (profile?.address || profile?.city) {
@@ -67,14 +70,14 @@ export function generateWhatsAppMessage(
       profile.state,
       profile.pincode,
     ].filter(Boolean);
-    message += `📍 Address: ${addressParts.join(', ')}\n`;
+    message += `📍 *Address:* ${addressParts.join(', ')}\n`;
   }
 
   if (profile?.latitude && profile?.longitude) {
-    message += `🗺️ Location: https://maps.google.com/?q=${profile.latitude},${profile.longitude}\n`;
+    message += `🗺️ *Location:* https://maps.google.com/?q=${profile.latitude},${profile.longitude}\n`;
   }
 
-  message += `\n📦 Please confirm my order. Thank you!`;
+  message += `\n✨ *Please confirm my order. Thank you!*`;
 
   return message;
 }

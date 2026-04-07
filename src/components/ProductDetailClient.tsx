@@ -66,9 +66,10 @@ export default function ProductDetailClient({ product }: { product: (typeof prod
 
   // Brewing Timer Logic
   const startTimer = () => {
-    const preset = product.category.toLowerCase().includes('green') ? 120 
-                 : product.category.toLowerCase().includes('assam') ? 240
-                 : product.category.toLowerCase().includes('rose') ? 180 : 180;
+    const name = product.name.toLowerCase();
+    const preset = name.includes('green') || name.includes('elite tea') ? 120 
+                 : name.includes('assam') ? 240
+                 : name.includes('rose') ? 180 : 180;
     
     setTimerLeft(preset);
     setIsTimerRunning(true);
@@ -361,7 +362,7 @@ export default function ProductDetailClient({ product }: { product: (typeof prod
               </button>
               <a
                 href={`https://wa.me/917811081552?text=${encodeURIComponent(
-                  `Hi! I'd like to order ${quantity} × ${product.name} (${selectedWeight.weight}) — ₹${selectedWeight.price * quantity}`
+                  `Hi! I'd like to order ${quantity} × ${product.name} (${selectedWeight.weight}).\n\nPlease confirm my order! ✨`
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
